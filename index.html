@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>NEXO STORE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#1F3A93;
+    --brand-dark:#152a6b;
+    --brand-light:#EAF0FF;
+    --accent:#FF6A3D;
+    --accent-dark:#e8532a;
+    --ink:#15181F;
+    --ink-soft:#5A616E;
+    --line:#E7E9EE;
+    --bg:#FFFFFF;
+    --bg-soft:#F7F8FA;
+    --good:#1E9E5A;
+    --bad:#D93B3B;
+    --radius:14px;
+    --radius-sm:8px;
+    --shadow:0 6px 24px rgba(21,24,31,.07);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Cairo',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  img{max-width:100%;display:block;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  input,select,textarea{font-family:inherit;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ---------- Splash ---------- */
+  #splash{
+    position:fixed;inset:0;background:var(--brand);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    z-index:9999;color:#fff;transition:opacity .5s ease, visibility .5s ease;
+  }
+  #splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+  #splash .logo{font-size:38px;font-weight:900;letter-spacing:.5px;}
+  #splash .logo span{color:#FFD9A0;}
+  #splash .tag{margin-top:10px;font-size:14px;color:#CBD6FF;}
+  #splash .loader{margin-top:34px;width:46px;height:46px;border-radius:50%;
+    border:3px solid rgba(255,255,255,.25);border-top-color:#fff;animation:spin 0.9s linear infinite;}
+  #splash .loadtext{margin-top:16px;font-size:13px;color:#CBD6FF;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---------- Layout helpers ---------- */
+  .wrap{max-width:1180px;margin:0 auto;padding:0 18px;}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+
+  /* ---------- Header ---------- */
+  header.site{
+    position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px solid var(--line);
+  }
+  .header-row{display:flex;align-items:center;gap:16px;padding:14px 0;}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:900;font-size:22px;color:var(--brand);white-space:nowrap;}
+  .brand .dot{color:var(--accent);}
+  .search-box{
+    flex:1;display:flex;align-items:center;background:var(--bg-soft);
+    border:1px solid var(--line);border-radius:999px;padding:0 14px;height:44px;gap:8px;
+  }
+  .search-box input{flex:1;border:none;background:transparent;outline:none;font-size:14px;color:var(--ink);}
+  .search-box svg{flex:none;opacity:.55;}
+  .header-actions{display:flex;align-items:center;gap:8px;}
+  .icon-btn{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:12px;background:var(--bg-soft);border:1px solid var(--line);
+    transition:background .15s;
+  }
+  .icon-btn:hover{background:var(--brand-light);}
+  .badge{
+    position:absolute;top:-6px;left:-6px;background:var(--accent);color:#fff;font-size:11px;
+    font-weight:700;min-width:19px;height:19px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+    padding:0 4px;
+  }
+  .track-btn{
+    display:flex;align-items:center;gap:6px;height:44px;padding:0 16px;border-radius:12px;
+    background:var(--bg-soft);border:1px solid var(--line);font-size:13.5px;font-weight:600;white-space:nowrap;
+  }
+  .track-btn:hover{background:var(--brand-light);}
+
+  /* categories */
+  .cats{display:flex;gap:8px;padding:12px 0;overflow-x:auto;scrollbar-width:none;}
+  .cats::-webkit-scrollbar{display:none;}
+  .cat-chip{
+    flex:none;padding:9px 18px;border-radius:999px;border:1px solid var(--line);
+    font-size:13.5px;font-weight:600;color:var(--ink-soft);background:#fff;white-space:nowrap;
+    transition:all .15s;
+  }
+  .cat-chip.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+
+  /* ---------- Product grid ---------- */
+  main{padding:22px 0 60px;}
+  .section-title{font-size:19px;font-weight:800;margin:6px 0 16px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;}
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+    display:flex;flex-direction:column;transition:box-shadow .18s, transform .18s;cursor:pointer;
+  }
+  .card:hover{box-shadow:var(--shadow);transform:translateY(-2px);}
+  .card-img{
+    aspect-ratio:1/1;width:100%;background:linear-gradient(135deg,var(--brand-light),#fff);
+    display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+  }
+  .card-img img{width:100%;height:100%;object-fit:cover;}
+  .card-img .ph{font-size:34px;color:var(--brand);opacity:.35;font-weight:900;}
+  .tag-digital{
+    position:absolute;top:8px;right:8px;background:var(--brand);color:#fff;font-size:10.5px;
+    font-weight:700;padding:3px 9px;border-radius:999px;
+  }
+  .tag-out{
+    position:absolute;inset:0;background:rgba(255,255,255,.82);display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:var(--bad);font-size:13px;
+  }
+  .card-body{padding:11px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1;}
+  .card-name{font-size:13.5px;font-weight:700;line-height:1.4;min-height:38px;}
+  .card-desc{font-size:11.5px;color:var(--ink-soft);line-height:1.5;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:32px;}
+  .card-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:4px;gap:6px;}
+  .price{font-weight:800;color:var(--brand);font-size:15px;}
+  .price small{font-size:11px;font-weight:600;color:var(--ink-soft);}
+  .add-btn{
+    width:36px;height:36px;border-radius:10px;background:var(--brand);color:#fff;
+    display:flex;align-items:center;justify-content:center;flex:none;transition:background .15s;
+  }
+  .add-btn:hover{background:var(--brand-dark);}
+  .add-btn:disabled{background:#C9CDD6;cursor:not-allowed;}
+  .empty-msg{padding:60px 10px;text-align:center;color:var(--ink-soft);font-size:14px;}
+
+  /* ---------- Modal / overlay base ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(15,18,26,.5);z-index:100;
+    display:flex;align-items:flex-end;justify-content:center;
+    opacity:0;visibility:hidden;transition:opacity .2s;
+  }
+  .overlay.open{opacity:1;visibility:visible;}
+  @media(min-width:720px){.overlay{align-items:center;}}
+  .sheet{
+    background:#fff;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;
+    border-radius:20px 20px 0 0;transform:translateY(24px);transition:transform .25s ease;
+    box-shadow:0 -8px 30px rgba(0,0,0,.15);
+  }
+  @media(min-width:720px){.sheet{border-radius:20px;transform:translateY(10px);}}
+  .overlay.open .sheet{transform:translateY(0);}
+  .sheet-head{
+    position:sticky;top:0;background:#fff;display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px;border-bottom:1px solid var(--line);z-index:2;
+  }
+  .sheet-head h3{margin:0;font-size:16px;font-weight:800;}
+  .close-btn{width:34px;height:34px;border-radius:10px;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;}
+  .sheet-body{padding:18px;}
+
+  /* product detail */
+  .pd-img{width:100%;aspect-ratio:1.1/1;border-radius:14px;background:linear-gradient(135deg,var(--brand-light),#fff);
+    display:flex;align-items:center;justify-content:center;margin-bottom:16px;overflow:hidden;}
+  .pd-img img{width:100%;height:100%;object-fit:cover;}
+  .pd-name{font-size:18px;font-weight:800;margin:0 0 6px;}
+  .pd-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.7;margin:0 0 14px;}
+  .pd-price-row{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;}
+  .pd-price{font-size:22px;font-weight:900;color:var(--brand);}
+  .pd-stock{font-size:12.5px;color:var(--ink-soft);}
+  .field-label{font-size:13px;font-weight:700;margin-bottom:8px;display:block;}
+  .qty-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .qty-ctrl{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  .qty-ctrl button{width:40px;height:40px;font-size:18px;font-weight:700;background:var(--bg-soft);}
+  .qty-ctrl span{width:44px;text-align:center;font-weight:700;font-size:15px;}
+  .opts-select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:13.5px;margin-bottom:16px;}
+  .bulk-note{background:var(--brand-light);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--brand-dark);margin-bottom:16px;line-height:1.7;}
+  .primary-btn{
+    width:100%;padding:14px;border-radius:12px;background:var(--brand);color:#fff;font-weight:800;font-size:14.5px;
+    transition:background .15s;
+  }
+  .primary-btn:hover{background:var(--brand-dark);}
+  .primary-btn:disabled{background:#C9CDD6;cursor:not-allowed;}
+  .accent-btn{background:var(--accent);}
+  .accent-btn:hover{background:var(--accent-dark);}
+  .ghost-btn{
+    width:100%;padding:13px;border-radius:12px;background:var(--bg-soft);border:1px solid var(--line);font-weight:700;font-size:13.5px;
+  }
+
+  /* cart */
+  .cart-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);}
+  .cart-item img,.ci-ph{width:62px;height:62px;border-radius:10px;object-fit:cover;background:var(--brand-light);flex:none;
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--brand);}
+  .ci-info{flex:1;min-width:0;}
+  .ci-name{font-size:13px;font-weight:700;margin-bottom:3px;}
+  .ci-price{font-size:12px;color:var(--ink-soft);}
+  .ci-actions{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+  .ci-qty{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;}
+  .ci-qty button{width:28px;height:28px;font-weight:700;}
+  .ci-remove{color:var(--bad);font-size:12px;font-weight:700;}
+  .sum-row{display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;color:var(--ink-soft);}
+  .sum-row.total{font-size:16px;font-weight:800;color:var(--ink);border-top:1px solid var(--line);padding-top:12px;margin-top:6px;}
+  .sum-row .val-good{color:var(--good);}
+
+  /* checkout form */
+  .form-group{margin-bottom:14px;}
+  .form-group label{font-size:13px;font-weight:700;display:block;margin-bottom:6px;}
+  .form-group input,.form-group textarea,.form-group select{
+    width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;font-size:13.5px;outline:none;
+    transition:border-color .15s;
+  }
+  .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--brand);}
+  .seg{display:flex;gap:8px;}
+  .seg button{
+    flex:1;padding:11px 8px;border-radius:12px;border:1px solid var(--line);font-size:13px;font-weight:700;
+    color:var(--ink-soft);background:#fff;
+  }
+  .seg button.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .pickup-info{background:var(--brand-light);border-radius:12px;padding:12px;font-size:13px;color:var(--brand-dark);margin-bottom:14px;line-height:1.7;}
+  .pay-opts{display:flex;flex-direction:column;gap:8px;}
+  .pay-opt{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13.5px;font-weight:600;}
+  .pay-opt input{width:17px;height:17px;}
+
+  /* success */
+  .success-wrap{text-align:center;padding:14px 4px 4px;}
+  .success-check{
+    width:64px;height:64px;border-radius:50%;background:#E7F8EE;color:var(--good);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:30px;
+  }
+  .order-num{
+    background:var(--bg-soft);border-radius:12px;padding:14px;margin:16px 0;font-weight:800;
+    font-size:17px;letter-spacing:.5px;color:var(--brand);
+  }
+
+  /* order status */
+  .status-track{display:flex;flex-direction:column;gap:0;margin-top:6px;}
+  .status-step{display:flex;gap:12px;align-items:flex-start;position:relative;padding-bottom:22px;}
+  .status-step:last-child{padding-bottom:0;}
+  .status-dot{width:24px;height:24px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;flex:none;z-index:1;}
+  .status-step.done .status-dot{background:var(--good);}
+  .status-step.current .status-dot{background:var(--brand);}
+  .status-line{position:absolute;top:24px;bottom:0;right:11.5px;width:2px;background:var(--line);}
+  .status-step.done .status-line{background:var(--good);}
+  .status-label{font-size:13.5px;font-weight:700;padding-top:2px;}
+  .status-step.cancelled .status-dot{background:var(--bad);}
+
+  /* toast */
+  #toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-size:13.5px;font-weight:600;
+    z-index:200;opacity:0;visibility:hidden;transition:all .25s;box-shadow:0 8px 24px rgba(0,0,0,.25);white-space:nowrap;
+  }
+  #toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+
+  footer{border-top:1px solid var(--line);padding:26px 0;text-align:center;color:var(--ink-soft);font-size:12.5px;}
+  footer b{color:var(--brand);}
+
+  @media(max-width:480px){
+    .brand{font-size:19px;}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= Splash ================= -->
+<div id="splash">
+  <div class="logo">NEXO <span>STORE</span></div>
+  <div class="tag">متجرك، منتجاتك، طلباتك... في مكان واحد</div>
+  <div class="loader"></div>
+  <div class="loadtext">جاري تجهيز المتجر...</div>
+</div>
+
+<!-- ================= Header ================= -->
+<header class="site">
+  <div class="wrap">
+    <div class="header-row">
+      <div class="brand">NEXO<span class="dot">.</span></div>
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#5A616E" stroke-width="2"/><path d="M21 21l-4-4" stroke="#5A616E" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="searchInput" type="text" placeholder="ابحث عن منتج...">
+      </div>
+      <div class="header-actions">
+        <button class="track-btn" id="trackOrderBtn">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h12" stroke="#15181F" stroke-width="2" stroke-linecap="round"/></svg>
+          <span>استعلام الطلب</span>
+        </button>
+        <button class="icon-btn" id="cartBtn" aria-label="السلة">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 12.2a2 2 0 002 1.8h8.6a2 2 0 002-1.7L21 8H6" stroke="#15181F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="20" r="1.4" fill="#15181F"/><circle cx="18" cy="20" r="1.4" fill="#15181F"/></svg>
+          <span class="badge" id="cartBadge" style="display:none;">0</span>
+        </button>
+      </div>
+    </div>
+    <div class="cats" id="catsRow"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h2 class="section-title" id="gridTitle">جميع المنتجات</h2>
+  <div class="grid" id="productGrid"></div>
+  <div class="empty-msg" id="emptyMsg" style="display:none;">لا توجد منتجات مطابقة للبحث</div>
+</main>
+
+<footer>
+  <b>NEXO STORE</b> — متجرك، منتجاتك، طلباتك... في مكان واحد
+</footer>
+
+<!-- ================= Product Detail ================= -->
+<div class="overlay" id="pdOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3>تفاصيل المنتج</h3>
+      <button class="close-btn" data-close="pdOverlay">✕</button>
+    </div>
+    <div class="sheet-body" id="pdBody"></div>
+  </div>
+</div>
+
+<!-- ================= Cart ================= -->
+<div class="overlay" id="cartOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3>سلة المشتريات</h3>
+      <button class="close-btn" data-close="cartOverlay">✕</button>
+    </div>
+    <div class="sheet-body" id="cartBody"></div>
+  </div>
+</div>
+
+<!-- ================= Checkout ================= -->
+<div class="overlay" id="checkoutOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3>إتمام الطلب</h3>
+      <button class="close-btn" data-close="checkoutOverlay">✕</button>
+    </div>
+    <div class="sheet-body" id="checkoutBody"></div>
+  </div>
+</div>
+
+<!-- ================= Track Order ================= -->
+<div class="overlay" id="trackOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3>استعلام الطلب</h3>
+      <button class="close-btn" data-close="trackOverlay">✕</button>
+    </div>
+    <div class="sheet-body" id="trackBody"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+/* =========================================================================
+   NEXO STORE — index.html
+   -------------------------------------------------------------------------
+   FIREBASE SETUP:
+   1) Create a Firebase project at https://console.firebase.google.com
+   2) Enable: Firestore Database, Storage, Authentication (Email/Password).
+   3) Copy your web app config into `firebaseConfig` below.
+   4) Recommended Firestore collections (created automatically on first use):
+        products  -> { name, description, price, cost, image, type,
+                        category, quantity, digitalLink, options, createdAt }
+        orders    -> { orderId, customerName, phone, address, deliveryMethod,
+                        paymentMethod, items, subtotal, discount, deliveryFee,
+                        total, status, notes, createdAt }
+        settings  -> single doc "store" with { deliveryFee, pickupPhone,
+                        discountTiers, storeName, storeDescription, ... }
+   Until real config is added below, the store runs on a local built-in
+   product list (the 15 starter products) so it is fully clickable/testable.
+   Once Firestore is configured, it becomes the source of truth automatically
+   and nothing here needs to change.
+   ========================================================================= */
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+let db = null;
+let firebaseReady = false;
+
+async function initFirebase(){
+  try{
+    if(firebaseConfig.apiKey === "YOUR_API_KEY") throw new Error("no-config");
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const firestore = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const app = initializeApp(firebaseConfig);
+    db = firestore.getFirestore(app);
+    window.__nexoFirestore = firestore;
+    window.__nexoDb = db;
+    firebaseReady = true;
+  }catch(e){
+    firebaseReady = false;
+    console.warn("NEXO STORE: يعمل حاليًا ببيانات محلية (لم يتم ضبط Firebase بعد).", e.message);
+  }
+}
+
+/* ---------------- Local fallback data (15 starter products) ---------------- */
+const FALLBACK_PRODUCTS = [
+  {id:"p1", name:"FASTER FT-71 - شاحن جداري بمنفذين USB مع الكيبل", description:"شاحن جداري أصلي بمنفذين USB شحن سريع 2.4A مع الكيبل، يشحن جوالين بنفس الوقت، حماية من الحرارة والتيار الزائد", price:10, cost:6, quantity:36, type:"متنوع", category:"شواحن", image:"", digitalLink:"", options:[]},
+  {id:"p2", name:"LDNIO LS543 - كيبل Type-C للآيفون Toughness", description:"كيبل آيفون من Type-C الى Lightning متين جدا Toughness، شحن سريع ونقل بيانات، يتحمل الطعج والشد", price:10, cost:6, quantity:23, type:"متنوع", category:"كيابل", image:"", digitalLink:"", options:[]},
+  {id:"p3", name:"OVAST OT-15 - كيبل Type-C شحن سريع 3.1A", description:"كيبل تايب سي شحن سريع 3.1A فل سريع، خامة قوية ضد القطع، ضمان سنة كاملة", price:5, cost:3, quantity:16, type:"متنوع", category:"كيابل", image:"", digitalLink:"", options:[]},
+  {id:"p4", name:"NITO N-100 - سماعة سلكية مع مايكروفون", description:"سماعة سلكية بصوت نقي وبيز قوي مع مايكروفون للمكالمات، مريحة للأذن، تركب على كل الجوالات", price:5, cost:3, quantity:35, type:"متنوع", category:"سماعات", image:"", digitalLink:"", options:[]},
+  {id:"p5", name:"iPlus I-18 - سماعة آيفون Lightning مع نافذة منبثقة", description:"سماعة آيفون مدخل Lightning مع نافذة منبثقة Pop-up، صوت ستيريو نقي ومايك واضح للمكالمات", price:5, cost:3, quantity:4, type:"متنوع", category:"سماعات", image:"", digitalLink:"", options:[]},
+  {id:"p6", name:"GLOW GLH-32 - ستاند سيارة مغناطيسي دوران 360 درجة", description:"ستاند سيارة مغناطيسي قوي دوران 360 درجة، يثبت على الطبلون، مغناطيس سوبر قوي يمسك الجوال حتى مع المطبات", price:10, cost:6, quantity:10, type:"متنوع", category:"حوامل", image:"", digitalLink:"", options:[]},
+  {id:"p7", name:"NITO N-H673 - سماعة سلكية Type-C للآيفون STEREO", description:"سماعة سلكية Type-C ستيريو STEREO للآيفون، صوت محيطي نقي، مايك احترافي للألعاب والمكالمات", price:10, cost:6, quantity:19, type:"متنوع", category:"سماعات", image:"", digitalLink:"", options:[]},
+  {id:"p8", name:"KUMS - كيبل Type-C قماش 1200mm طول 1.2 متر 3.4A", description:"كيبل تايب سي قماش مجدول 1200mm طول 1.2 متر، 3.4A شحن سريع جدا، خامة ما تنقطع بسهولة", price:5, cost:3, quantity:24, type:"متنوع", category:"كيابل", image:"", digitalLink:"", options:[]},
+  {id:"p9", name:"WINMFIX LED - لمبة LED ثلاثي + حامل جوال 2 في 1", description:"لمبة LED ثلاثية الإضاءة مع حامل جوال 2 في 1، إضاءة قوية للسيارة والبيت، تتحول لستاند جوال", price:5, cost:3, quantity:4, type:"متنوع", category:"حوامل", image:"", digitalLink:"", options:[]},
+  {id:"p10", name:"X.LOOD X-73 - كيبل Type-C تايب سي 3.1A", description:"كيبل تايب سي 3.1A شحن سريع، خامة مرنة وشحن ثابت وآمن لكل الجوالات", price:5, cost:3, quantity:18, type:"متنوع", category:"كيابل", image:"", digitalLink:"", options:[]},
+  {id:"p11", name:"UNIVERSAL CLIP - حامل جوال السيارة يركب على المراية", description:"حامل جوال للسيارة يركب على مراية السيارة، UNIVERSAL يركب على كل السيارات والجوالات، رؤية واضحة وآمنة", price:10, cost:6, quantity:8, type:"متنوع", category:"حوامل", image:"", digitalLink:"", options:[]},
+  {id:"p12", name:"GLOW GLH-29 - ستاند سيارة مغناطيسي مسطرة", description:"ستاند سيارة مغناطيسي مسطرة يركب على مسطرة المكيف، شكل أنيق ومغناطيس قوي جدا يمسك الجوال بثبات", price:10, cost:6, quantity:30, type:"متنوع", category:"حوامل", image:"", digitalLink:"", options:[]},
+  {id:"p13", name:"NITO CH-512 - راس شاحن مخرجين", description:"راس شاحن مخرجين USB شحن سريع، يشحن جوالين بنفس الوقت، حماية كاملة من الحرارة والشحن الزائد", price:10, cost:6, quantity:42, type:"متنوع", category:"شواحن", image:"", digitalLink:"", options:[]},
+  {id:"p14", name:"PROMASS PM-8509 - راس شاحن سريع PD+QC مجموع 38W", description:"راس شاحن سريع 38W مجموع، منفذ PD 20W + منفذ QC 18W، يشحن الآيفون 50% في نصف ساعة، أصلي", price:10, cost:6, quantity:12, type:"متنوع", category:"شواحن", image:"", digitalLink:"", options:[]},
+  {id:"p15", name:"GLOW GLH-26 - ستاند سيارة مغناطيسي صغير ميني", description:"ستاند سيارة مغناطيسي صغير ميني MINI، حجم صغير وأنيق، دوران حر 360، مغناطيس سوبر قوي من الزنك", price:10, cost:6, quantity:9, type:"متنوع", category:"حوامل", image:"", digitalLink:"", options:[]}
+];
+
+const DEFAULT_SETTINGS = {
+  storeName:"NEXO STORE",
+  storeDescription:"متجرك، منتجاتك، طلباتك... في مكان واحد",
+  deliveryFee:15,
+  pickupPhone:"0500000000",
+  discountTiers:[{min:20,percent:15},{min:10,percent:10},{min:5,percent:5}]
+};
+
+let PRODUCTS = [];
+let SETTINGS = { ...DEFAULT_SETTINGS };
+let currentCategory = "الكل";
+let searchTerm = "";
+let cart = JSON.parse(localStorage.getItem("nexo_cart") || "[]");
+
+/* ---------------- Local order storage (used when Firebase isn't configured) --------------- */
+function getLocalOrders(){ return JSON.parse(localStorage.getItem("nexo_orders") || "[]"); }
+function saveLocalOrders(o){ localStorage.setItem("nexo_orders", JSON.stringify(o)); }
+function getLocalStock(){ return JSON.parse(localStorage.getItem("nexo_stock") || "null"); }
+function saveLocalStock(s){ localStorage.setItem("nexo_stock", JSON.stringify(s)); }
+
+/* ================= Data loading ================= */
+async function loadProducts(){
+  if(firebaseReady){
+    try{
+      const { collection, getDocs } = window.__nexoFirestore;
+      const snap = await getDocs(collection(db, "products"));
+      if(!snap.empty){
+        PRODUCTS = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+        return;
+      }
+    }catch(e){ console.warn("تعذر تحميل المنتجات من Firebase، سيتم استخدام البيانات المحلية.", e); }
+  }
+  // fallback / seed
+  let stock = getLocalStock();
+  if(!stock){
+    stock = {};
+    FALLBACK_PRODUCTS.forEach(p => stock[p.id] = p.quantity);
+    saveLocalStock(stock);
+  }
+  PRODUCTS = FALLBACK_PRODUCTS.map(p => ({ ...p, quantity: stock[p.id] ?? p.quantity }));
+}
+
+async function loadSettings(){
+  if(firebaseReady){
+    try{
+      const { doc, getDoc } = window.__nexoFirestore;
+      const snap = await getDoc(doc(db, "settings", "store"));
+      if(snap.exists()){ SETTINGS = { ...DEFAULT_SETTINGS, ...snap.data() }; return; }
+    }catch(e){ console.warn("تعذر تحميل الإعدادات من Firebase.", e); }
+  }
+  SETTINGS = { ...DEFAULT_SETTINGS };
+}
+
+/* ================= Rendering ================= */
+const CATS = ["الكل","المنتجات الرقمية","المنتجات المتنوعة"];
+function renderCats(){
+  const row = document.getElementById("catsRow");
+  row.innerHTML = "";
+  CATS.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "cat-chip" + (c === currentCategory ? " active" : "");
+    btn.textContent = c;
+    btn.onclick = () => { currentCategory = c; renderCats(); renderGrid(); };
+    row.appendChild(btn);
+  });
+}
+
+function productMatchesCategory(p){
+  if(currentCategory === "الكل") return true;
+  if(currentCategory === "المنتجات الرقمية") return p.type === "رقمي";
+  if(currentCategory === "المنتجات المتنوعة") return p.type !== "رقمي";
+  return true;
+}
+function productMatchesSearch(p){
+  if(!searchTerm.trim()) return true;
+  const t = searchTerm.trim().toLowerCase();
+  return [p.name, p.description, p.type, p.category].filter(Boolean).some(f => f.toLowerCase().includes(t));
+}
+
+function money(n){ return (Math.round(n*100)/100).toLocaleString("ar-SA") + " ر.س"; }
+
+function renderGrid(){
+  const grid = document.getElementById("productGrid");
+  const empty = document.getElementById("emptyMsg");
+  const list = PRODUCTS.filter(p => productMatchesCategory(p) && productMatchesSearch(p));
+  document.getElementById("gridTitle").textContent = currentCategory === "الكل" ? "جميع المنتجات" : currentCategory;
+  grid.innerHTML = "";
+  if(list.length === 0){
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  list.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const out = p.quantity <= 0;
+    card.innerHTML = `
+      <div class="card-img">
+        ${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}">` : `<div class="ph">${escapeHtml(p.name.slice(0,2))}</div>`}
+        ${p.type === "رقمي" ? `<div class="tag-digital">رقمي</div>` : ``}
+        ${out ? `<div class="tag-out">نفد المخزون</div>` : ``}
+      </div>
+      <div class="card-body">
+        <div class="card-name">${escapeHtml(p.name)}</div>
+        <div class="card-desc">${escapeHtml(p.description || "")}</div>
+        <div class="card-bottom">
+          <div class="price">${money(p.price)}</div>
+          <button class="add-btn" ${out ? "disabled" : ""} data-add="${p.id}" aria-label="أضف إلى السلة">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>`;
+    card.addEventListener("click", (e) => {
+      if(e.target.closest("[data-add]")) return;
+      openProductDetail(p.id);
+    });
+    card.querySelector("[data-add]").addEventListener("click", (e) => {
+      e.stopPropagation();
+      if(out) return;
+      addToCart(p.id, 1);
+    });
+    grid.appendChild(card);
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+/* ================= Overlays ================= */
+function openOverlay(id){ document.getElementById(id).classList.add("open"); document.body.style.overflow="hidden"; }
+function closeOverlay(id){ document.getElementById(id).classList.remove("open"); document.body.style.overflow=""; }
+document.querySelectorAll("[data-close]").forEach(btn => {
+  btn.addEventListener("click", () => closeOverlay(btn.dataset.close));
+});
+document.querySelectorAll(".overlay").forEach(ov => {
+  ov.addEventListener("click", (e) => { if(e.target === ov) closeOverlay(ov.id); });
+});
+
+/* ================= Product detail ================= */
+let pdQty = 1;
+function bulkDiscountForQty(qty){
+  const tiers = [...SETTINGS.discountTiers].sort((a,b)=>b.min-a.min);
+  for(const t of tiers){ if(qty >= t.min) return t.percent; }
+  return 0;
+}
+function openProductDetail(id){
+  const p = PRODUCTS.find(x => x.id === id);
+  if(!p) return;
+  pdQty = 1;
+  renderProductDetail(p);
+  openOverlay("pdOverlay");
+}
+function renderProductDetail(p){
+  const disc = bulkDiscountForQty(pdQty);
+  const finalUnit = p.price * (1 - disc/100);
+  const total = finalUnit * pdQty;
+  const out = p.quantity <= 0;
+  document.getElementById("pdBody").innerHTML = `
+    <div class="pd-img">${p.image ? `<img src="${p.image}" alt="">` : `<div class="ph" style="font-size:44px;">${escapeHtml(p.name.slice(0,2))}</div>`}</div>
+    <h2 class="pd-name">${escapeHtml(p.name)}</h2>
+    <p class="pd-desc">${escapeHtml(p.description || "")}</p>
+    <div class="pd-price-row">
+      <div class="pd-price">${money(p.price)}</div>
+      <div class="pd-stock">${out ? "نفد المخزون" : "الكمية المتوفرة: " + p.quantity}</div>
+    </div>
+    ${p.options && p.options.length ? `
+      <label class="field-label">الخيارات</label>
+      <select class="opts-select" id="pdOptions">
+        ${p.options.map(o => `<option>${escapeHtml(o)}</option>`).join("")}
+      </select>` : ``}
+    <label class="field-label">الكمية</label>
+    <div class="qty-row">
+      <div class="qty-ctrl">
+        <button id="pdMinus">−</button>
+        <span id="pdQtyVal">${pdQty}</span>
+        <button id="pdPlus">+</button>
+      </div>
+    </div>
+    <div class="bulk-note">
+      خصم الجملة: 5 قطع فأكثر 5% • 10 قطع فأكثر 10% • 20 قطعة فأكثر 15%<br>
+      ${disc > 0 ? `الخصم المطبق حاليًا: <b>${disc}%</b> — السعر النهائي للوحدة ${money(finalUnit)}` : "أضف المزيد للحصول على خصم الجملة."}
+    </div>
+    <div class="sum-row total" style="border:none;padding-top:0;">
+      <span>الإجمالي</span><span>${money(total)}</span>
+    </div>
+    <button class="primary-btn" id="pdAddBtn" ${out ? "disabled" : ""} style="margin-top:10px;">
+      ${out ? "نفد المخزون" : "أضف إلى السلة"}
+    </button>
+  `;
+  document.getElementById("pdMinus").onclick = () => { if(pdQty>1){ pdQty--; renderProductDetail(p); } };
+  document.getElementById("pdPlus").onclick = () => {
+    if(pdQty < p.quantity){ pdQty++; renderProductDetail(p); }
+    else showToast("الكمية المطلوبة غير متوفرة");
+  };
+  const addBtn = document.getElementById("pdAddBtn");
+  if(addBtn) addBtn.onclick = () => {
+    const optEl = document.getElementById("pdOptions");
+    addToCart(p.id, pdQty, optEl ? optEl.value : null);
+    closeOverlay("pdOverlay");
+  };
+}
+
+/* ================= Cart ================= */
+function saveCart(){ localStorage.setItem("nexo_cart", JSON.stringify(cart)); }
+function cartCount(){ return cart.reduce((s,i)=>s+i.qty,0); }
+function updateCartBadge(){
+  const badge = document.getElementById("cartBadge");
+  const c = cartCount();
+  badge.style.display = c > 0 ? "flex" : "none";
+  badge.textContent = c;
+}
+function addToCart(productId, qty, option){
+  const p = PRODUCTS.find(x => x.id === productId);
+  if(!p) return;
+  const existing = cart.find(i => i.productId === productId && i.option === (option || null));
+  const currentQtyInCart = existing ? existing.qty : 0;
+  if(currentQtyInCart + qty > p.quantity){
+    showToast("الكمية المطلوبة غير متوفرة");
+    return;
+  }
+  if(existing){ existing.qty += qty; }
+  else{ cart.push({ productId, qty, option: option || null }); }
+  saveCart();
+  updateCartBadge();
+  showToast("تمت إضافة المنتج إلى السلة");
+}
+function changeCartQty(idx, delta){
+  const item = cart[idx];
+  const p = PRODUCTS.find(x => x.id === item.productId);
+  const newQty = item.qty + delta;
+  if(newQty <= 0){ cart.splice(idx,1); }
+  else if(p && newQty > p.quantity){ showToast("الكمية المطلوبة غير متوفرة"); return; }
+  else{ item.qty = newQty; }
+  saveCart();
+  updateCartBadge();
+  renderCart();
+}
+function removeCartItem(idx){
+  cart.splice(idx,1);
+  saveCart();
+  updateCartBadge();
+  renderCart();
+}
+
+function cartTotals(){
+  let subtotal = 0;
+  const qtyTotal = cartCount();
+  cart.forEach(i => {
+    const p = PRODUCTS.find(x => x.id === i.productId);
+    if(p) subtotal += p.price * i.qty;
+  });
+  const discPercent = bulkDiscountForQty(qtyTotal);
+  const discount = subtotal * discPercent/100;
+  return { subtotal, discPercent, discount, qtyTotal };
+}
+
+function renderCart(){
+  const body = document.getElementById("cartBody");
+  if(cart.length === 0){
+    body.innerHTML = `<div class="empty-msg">السلة فارغة</div>`;
+    return;
+  }
+  const { subtotal, discPercent, discount } = cartTotals();
+  let itemsHtml = "";
+  cart.forEach((item, idx) => {
+    const p = PRODUCTS.find(x => x.id === item.productId);
+    if(!p) return;
+    itemsHtml += `
+      <div class="cart-item">
+        ${p.image ? `<img src="${p.image}" alt="">` : `<div class="ci-ph">${escapeHtml(p.name.slice(0,2))}</div>`}
+        <div class="ci-info">
+          <div class="ci-name">${escapeHtml(p.name)}${item.option ? " — " + escapeHtml(item.option) : ""}</div>
+          <div class="ci-price">${money(p.price)} / قطعة</div>
+          <div class="ci-actions">
+            <div class="ci-qty">
+              <button data-dec="${idx}">−</button>
+              <span style="min-width:22px;text-align:center;font-weight:700;font-size:13px;">${item.qty}</span>
+              <button data-inc="${idx}">+</button>
+            </div>
+            <button class="ci-remove" data-rm="${idx}">حذف</button>
+          </div>
+        </div>
+      </div>`;
+  });
+  body.innerHTML = `
+    <div>${itemsHtml}</div>
+    <div style="margin-top:14px;">
+      <div class="sum-row"><span>الإجمالي الفرعي</span><span>${money(subtotal)}</span></div>
+      <div class="sum-row"><span>خصم الجملة${discPercent ? " ("+discPercent+"%)" : ""}</span><span class="val-good">${discount>0 ? "-"+money(discount) : money(0)}</span></div>
+      <div class="sum-row total"><span>الإجمالي</span><span>${money(subtotal - discount)}</span></div>
+    </div>
+    <button class="primary-btn accent-btn" id="goCheckoutBtn" style="margin-top:14px;">إتمام الطلب</button>
+  `;
+  body.querySelectorAll("[data-inc]").forEach(b => b.onclick = () => changeCartQty(+b.dataset.inc, 1));
+  body.querySelectorAll("[data-dec]").forEach(b => b.onclick = () => changeCartQty(+b.dataset.dec, -1));
+  body.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => removeCartItem(+b.dataset.rm));
+  const goBtn = document.getElementById("goCheckoutBtn");
+  if(goBtn) goBtn.onclick = () => { closeOverlay("cartOverlay"); openCheckout(); };
+}
+
+document.getElementById("cartBtn").addEventListener("click", () => { renderCart(); openOverlay("cartOverlay"); });
+
+/* ================= Checkout ================= */
+let deliveryMethod = "delivery"; // 'delivery' | 'pickup'
+let paymentMethod = "cash";
+
+function openCheckout(){
+  if(cart.length === 0){ showToast("السلة فارغة"); return; }
+  deliveryMethod = "delivery";
+  paymentMethod = "cash";
+  renderCheckout();
+  openOverlay("checkoutOverlay");
+}
+function renderCheckout(){
+  const { subtotal, discPercent, discount } = cartTotals();
+  const fee = deliveryMethod === "delivery" ? Number(SETTINGS.deliveryFee || 0) : 0;
+  const total = subtotal - discount + fee;
+  document.getElementById("checkoutBody").innerHTML = `
+    <div class="form-group">
+      <label>طريقة الاستلام</label>
+      <div class="seg">
+        <button type="button" id="segDelivery" class="${deliveryMethod==='delivery'?'active':''}">توصيل</button>
+        <button type="button" id="segPickup" class="${deliveryMethod==='pickup'?'active':''}">استلام</button>
+      </div>
+    </div>
+    ${deliveryMethod === 'pickup' ? `
+      <div class="pickup-info">سيتم استلام الطلب من موقعنا. للتواصل: ${escapeHtml(SETTINGS.pickupPhone)}</div>
+    ` : ``}
+    <div class="form-group"><label>الاسم</label><input id="cfName" type="text" placeholder="اسمك الكامل"></div>
+    <div class="form-group"><label>رقم الجوال</label><input id="cfPhone" type="tel" placeholder="05xxxxxxxx"></div>
+    <div class="form-group"><label>المدينة</label><input id="cfCity" type="text" placeholder="المدينة"></div>
+    ${deliveryMethod === 'delivery' ? `
+    <div class="form-group"><label>العنوان</label><input id="cfAddress" type="text" placeholder="الحي، الشارع، تفاصيل إضافية"></div>
+    ` : ``}
+    <div class="form-group">
+      <label>طريقة الدفع</label>
+      <div class="pay-opts">
+        <label class="pay-opt"><input type="radio" name="pay" value="نقدًا" ${paymentMethod==='cash'?'checked':''} data-pay="cash"> نقدًا</label>
+        <label class="pay-opt"><input type="radio" name="pay" value="بطاقة/شبكة" ${paymentMethod==='card'?'checked':''} data-pay="card"> بطاقة / شبكة</label>
+        <label class="pay-opt"><input type="radio" name="pay" value="PayPal" ${paymentMethod==='paypal'?'checked':''} data-pay="paypal"> PayPal</label>
+      </div>
+    </div>
+    <div class="form-group"><label>ملاحظات</label><textarea id="cfNotes" rows="2" placeholder="ملاحظات إضافية (اختياري)"></textarea></div>
+
+    <div style="margin:16px 0;">
+      <div class="sum-row"><span>الإجمالي الفرعي</span><span>${money(subtotal)}</span></div>
+      <div class="sum-row"><span>خصم الجملة${discPercent?" ("+discPercent+"%)":""}</span><span class="val-good">${discount>0?"-"+money(discount):money(0)}</span></div>
+      <div class="sum-row"><span>رسوم التوصيل</span><span>${deliveryMethod==='delivery' ? money(fee) : "لا يوجد"}</span></div>
+      <div class="sum-row total"><span>الإجمالي النهائي</span><span>${money(total)}</span></div>
+    </div>
+    <button class="primary-btn accent-btn" id="submitOrderBtn">تأكيد الطلب</button>
+  `;
+  document.getElementById("segDelivery").onclick = () => { deliveryMethod='delivery'; renderCheckout(); };
+  document.getElementById("segPickup").onclick = () => { deliveryMethod='pickup'; renderCheckout(); };
+  document.querySelectorAll("[data-pay]").forEach(r => r.onchange = () => { paymentMethod = r.dataset.pay; });
+  document.getElementById("submitOrderBtn").onclick = submitOrder;
+}
+
+function genOrderId(){
+  const n = Math.floor(10000000 + Math.random()*89999999);
+  return "NEXO-" + n;
+}
+
+async function submitOrder(){
+  const name = document.getElementById("cfName").value.trim();
+  const phone = document.getElementById("cfPhone").value.trim();
+  const city = document.getElementById("cfCity").value.trim();
+  const addressEl = document.getElementById("cfAddress");
+  const address = addressEl ? addressEl.value.trim() : "";
+  const notes = document.getElementById("cfNotes").value.trim();
+
+  if(!name || !phone || !city || (deliveryMethod==='delivery' && !address)){
+    showToast("يرجى تعبئة جميع الحقول المطلوبة");
+    return;
+  }
+
+  const { subtotal, discPercent, discount } = cartTotals();
+  const fee = deliveryMethod === 'delivery' ? Number(SETTINGS.deliveryFee || 0) : 0;
+  const total = subtotal - discount + fee;
+
+  const items = cart.map(i => {
+    const p = PRODUCTS.find(x => x.id === i.productId);
+    return { productId:i.productId, name:p?p.name:"", price:p?p.price:0, qty:i.qty, option:i.option||null };
+  });
+
+  const order = {
+    orderId: genOrderId(),
+    customerName: name,
+    phone, city,
+    address: deliveryMethod === 'delivery' ? address : "",
+    deliveryMethod: deliveryMethod === 'delivery' ? "توصيل" : "استلام",
+    paymentMethod: paymentMethod === 'cash' ? "نقدًا" : (paymentMethod === 'card' ? "بطاقة/شبكة" : "PayPal"),
+    items, subtotal, discount, deliveryFee: fee, total,
+    notes, status: "جديد",
+    createdAt: new Date().toISOString()
+  };
+
+  const submitBtn = document.getElementById("submitOrderBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "جاري إنشاء الطلب...";
+
+  try{
+    if(firebaseReady){
+      const { collection, addDoc, doc, updateDoc, increment } = window.__nexoFirestore;
+      await addDoc(collection(db, "orders"), order);
+      // decrement stock
+      for(const it of items){
+        try{ await updateDoc(doc(db, "products", it.productId), { quantity: increment(-it.qty) }); }catch(e){}
+      }
+    }else{
+      const orders = getLocalOrders();
+      orders.push(order);
+      saveLocalOrders(orders);
+      const stock = getLocalStock() || {};
+      items.forEach(it => { stock[it.productId] = Math.max(0, (stock[it.productId] ?? 0) - it.qty); });
+      saveLocalStock(stock);
+    }
+
+    // update in-memory product quantities to reflect purchase immediately
+    items.forEach(it => {
+      const p = PRODUCTS.find(x => x.id === it.productId);
+      if(p) p.quantity = Math.max(0, p.quantity - it.qty);
+    });
+
+    cart = [];
+    saveCart();
+    updateCartBadge();
+    renderGrid();
+
+    document.getElementById("checkoutBody").innerHTML = `
+      <div class="success-wrap">
+        <div class="success-check">✓</div>
+        <div style="font-weight:800;font-size:16px;">تم إنشاء طلبك بنجاح</div>
+        <div class="order-num">${order.orderId}</div>
+        <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;">احتفظ برقم الطلب لمتابعة حالته من زر "استعلام الطلب"</div>
+        <button class="primary-btn" id="closeSuccessBtn">تم</button>
+      </div>
+    `;
+    document.getElementById("closeSuccessBtn").onclick = () => closeOverlay("checkoutOverlay");
+  }catch(e){
+    console.error(e);
+    showToast("حدث خطأ، حاول مرة أخرى");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "تأكيد الطلب";
+  }
+}
+
+/* ================= Track order ================= */
+document.getElementById("trackOrderBtn").addEventListener("click", () => {
+  renderTrackForm();
+  openOverlay("trackOverlay");
+});
+function renderTrackForm(){
+  document.getElementById("trackBody").innerHTML = `
+    <div class="form-group">
+      <label>أدخل رقم الطلب</label>
+      <input id="trackInput" type="text" placeholder="NEXO-12345678">
+    </div>
+    <button class="primary-btn" id="trackSearchBtn">بحث</button>
+    <div id="trackResult" style="margin-top:18px;"></div>
+  `;
+  document.getElementById("trackSearchBtn").onclick = doTrackSearch;
+  document.getElementById("trackInput").addEventListener("keydown", e => { if(e.key === "Enter") doTrackSearch(); });
+}
+async function doTrackSearch(){
+  const val = document.getElementById("trackInput").value.trim();
+  const resultBox = document.getElementById("trackResult");
+  if(!val){ resultBox.innerHTML = `<div class="empty-msg">أدخل رقم الطلب</div>`; return; }
+  resultBox.innerHTML = `<div class="empty-msg">جاري البحث...</div>`;
+
+  let order = null;
+  try{
+    if(firebaseReady){
+      const { collection, query, where, getDocs } = window.__nexoFirestore;
+      const q = query(collection(db, "orders"), where("orderId", "==", val));
+      const snap = await getDocs(q);
+      if(!snap.empty) order = snap.docs[0].data();
+    }else{
+      const orders = getLocalOrders();
+      order = orders.find(o => o.orderId === val) || null;
+    }
+  }catch(e){ console.error(e); }
+
+  if(!order){
+    resultBox.innerHTML = `<div class="empty-msg">لم يتم العثور على الطلب</div>`;
+    return;
+  }
+  const steps = ["جديد","قيد التجهيز","خرج للتوصيل","تم التسليم"];
+  const isCancelled = order.status === "ملغي";
+  const currentIdx = steps.indexOf(order.status);
+  resultBox.innerHTML = `
+    <div style="margin-bottom:10px;">
+      <div style="font-weight:800;font-size:15px;">${order.orderId}</div>
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:2px;">${escapeHtml(order.customerName)} • ${money(order.total)}</div>
+    </div>
+    <div class="status-track">
+      ${isCancelled ? `
+        <div class="status-step cancelled done">
+          <div class="status-dot"></div>
+          <div class="status-label">تم إلغاء الطلب</div>
+        </div>` :
+        steps.map((s, i) => `
+        <div class="status-step ${i < currentIdx ? 'done' : ''} ${i === currentIdx ? 'current' : ''}">
+          ${i < steps.length - 1 ? `<div class="status-line"></div>` : ``}
+          <div class="status-dot"></div>
+          <div class="status-label">${s}</div>
+        </div>`).join("")
+      }
+    </div>
+  `;
+}
+
+/* ================= Search ================= */
+let searchDebounce;
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => { searchTerm = e.target.value; renderGrid(); }, 150);
+});
+
+/* ================= Toast ================= */
+let toastTimeout;
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+/* ================= Boot ================= */
+(async function boot(){
+  await initFirebase();
+  await Promise.all([loadProducts(), loadSettings()]);
+  renderCats();
+  renderGrid();
+  updateCartBadge();
+  setTimeout(() => { document.getElementById("splash").classList.add("hide"); }, 550);
+})();
+</script>
+</body>
+</html>
